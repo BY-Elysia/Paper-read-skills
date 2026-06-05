@@ -71,3 +71,5 @@ For each embedded table, explain:
 - Are negative results or failure cases shown?
 - Are there signs that the method is benchmark-specific?
 - Does the paper distinguish correlation from causal evidence?
+- Which negative results or uncovered settings are explicitly acknowledged as limitations?
+- Which future experiments, datasets, model changes, or evaluations do the authors propose?

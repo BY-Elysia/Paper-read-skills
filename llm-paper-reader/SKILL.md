@@ -1,13 +1,13 @@
 ---
 name: llm-paper-reader
-description: Use when reading, summarizing, explaining, reviewing, or implementing LLM and large-model papers, including architecture, training, inference, alignment, RAG, agents, multimodal, benchmark, and systems papers. Produces formal Chinese academic Markdown reports with clear logical structure, architecture and process explanations, inline terminology, formulas with calculation-level interpretations, pseudocode for key model/training/inference flows, relevant cropped original figures/tables, and generated explanatory diagrams when the paper lacks useful visuals.
+description: Use when reading, summarizing, explaining, reviewing, or implementing LLM and large-model papers, including architecture, training, inference, alignment, RAG, agents, multimodal, benchmark, and systems papers. Produces formal Chinese academic Markdown reports with clear logical structure, architecture and process explanations, inline terminology, formulas with calculation-level interpretations, pseudocode for key model/training/inference flows, relevant cropped original figures/tables, and grounded analysis of author-stated limitations and future work.
 ---
 
 # LLM Paper Reader
 
 ## Goal
 
-Read LLM-field papers and produce a formal academic explanation report that another researcher or student can read directly. Avoid generic summaries and translation-like paraphrases. Explain the paper's problem setting, complete conceptual architecture, method logic, formulas, algorithms or pseudocode, experiments, limitations, and implementation implications.
+Read LLM-field papers and produce a formal academic explanation report that another researcher or student can read directly. Avoid generic summaries and translation-like paraphrases. Explain the paper's problem setting, complete conceptual architecture, method logic, formulas, algorithms or pseudocode, experiments, author-stated limitations and future work, and implementation implications.
 
 The default deliverable is a polished Chinese Markdown report, usually named `report.md`, not a collection of notes. Text extraction, figure extraction, and evidence mapping are internal preparation steps.
 
@@ -28,6 +28,7 @@ The default deliverable is a polished Chinese Markdown report, usually named `re
    - Use `references/pseudocode_guide.md` whenever the report needs to explain a model forward pass, training step, inference algorithm, retrieval/routing process, or update rule.
    - Use `references/terminology_guide.md` when the paper introduces named terms, modules, metrics, datasets, or objectives.
    - Use `references/experiment_checklist.md` when analyzing experiments, baselines, ablations, or metrics.
+   - Use `references/limitations_future_work.md` when extracting author-stated limitations, failure cases, risks, future work, open questions, or report-level boundary analysis.
    - Use `references/visual_policy.md` when extracting original figures or generating explanatory diagrams.
 
 ## Paper Type
@@ -52,9 +53,10 @@ Use the classification to decide which sections need the deepest reading.
 2. Read the method section deeply and extract modules, data flow, objectives, algorithms, and inference-time behavior.
 3. Inspect figures, tables, equations, and algorithms before writing conclusions.
 4. Read experiments for datasets, baselines, metrics, main results, ablations, and failure cases.
-5. Check limitations and appendix implementation details when available.
-6. Audit pseudocode for unexplained paper-specific functions. Expand or define every understanding-critical call and verify it agrees with the formulas, shapes, masks, frozen/trainable state, and gradient/update paths.
-7. Produce a polished Chinese Markdown report using the output template. Preserve the paper's logical progression, but do not mechanically mirror every subsection heading.
+5. Inspect limitations, discussion, conclusion, failure cases, broader impact, ethical considerations, and appendix notes. Extract the authors' explicitly stated limitations and future directions, even when they are scattered outside a dedicated section.
+6. Distinguish author-stated limitations, author-proposed future work, experiment-supported boundaries, and your own cautious analysis.
+7. Audit pseudocode for unexplained paper-specific functions. Expand or define every understanding-critical call and verify it agrees with the formulas, shapes, masks, frozen/trainable state, and gradient/update paths.
+8. Produce a polished Chinese Markdown report using the output template. Preserve the paper's logical progression, but do not mechanically mirror every subsection heading.
 
 ## Evidence Rules
 
@@ -64,6 +66,7 @@ Use the classification to decide which sections need the deepest reading.
 - If the paper omits a detail, write `原文未明确说明`.
 - Do not invent modules, datasets, baselines, hyperparameters, metrics, equations, or results.
 - Do not present external background knowledge as if it came from the paper.
+- Do not present report-level limitation analysis or suggested future work as if the authors stated it.
 - Do not include a final bookkeeping section that lists evidence anchors unless explicitly requested.
 
 ## Architecture Requirements
@@ -161,5 +164,6 @@ Use cropped table images for main results and important ablations, then explain 
 - Avoid meta-report phrasing about the report's writing choices. Captions should directly explain the paper content.
 - Avoid reports that read like Chinese translations of the paper. The report should teach the paper's internal logic.
 - Keep the report concrete: architecture, terminology, evidence, experiments, and limitations should be more detailed than the high-level summary.
+- Include limitations and future work explicitly stated by the paper. If the paper does not state a future direction, write `原文未明确提出后续研究方向` instead of inventing one.
 - Use code blocks for key flows when they improve understanding: training steps, inference steps, attention masks, loss computation, data construction, retrieval/routing, or evaluation.
 - Pseudocode must expose the paper's important internals. Standard operations may remain black boxes, but novel or understanding-critical functions must be defined or expanded nearby.
