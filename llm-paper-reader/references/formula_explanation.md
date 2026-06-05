@@ -53,6 +53,8 @@ When formulas define a process rather than a single scalar, add a compact pseudo
 
 Pseudocode must use paper-grounded names. If a line depends on an implementation detail not stated in the paper, mark it as `原文未明确说明` or phrase it as an implementation assumption.
 
+Do not use an undefined paper-specific function as a substitute for explaining a formula or mechanism. Expand important scoring, attention, routing, retrieval, loss, or update functions until the actual computation is visible.
+
 ## Placement
 
 Explain formulas where the corresponding mechanism appears in the report. Do not collect all formulas into a standalone formula section unless the user explicitly asks.

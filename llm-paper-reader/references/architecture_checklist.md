@@ -35,6 +35,21 @@ Use this checklist when the paper proposes or modifies a model, training framewo
 - Sampling, decoding, reranking, search, self-consistency, or tool-use policy
 - Differences between training-time and inference-time behavior
 
+## Module Call Graph
+
+For every paper-specific module or important function:
+
+- caller and call site
+- purpose
+- inputs and shapes
+- internal operations in order
+- masks, routing, retrieval, or sampling rules
+- outputs and shapes
+- trainable/frozen/cached/external state
+- gradient or update path
+
+Do not stop at an end-to-end flow if a central module remains an unexplained black box.
+
 ## Cost and Constraints
 
 - Parameter count

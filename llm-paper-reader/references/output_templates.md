@@ -4,7 +4,7 @@ Use this as the default Chinese academic report structure. The report should tea
 
 Do not include raw evidence indexes, extraction logs, figure metadata tables, standalone terminology chapters, standalone formula chapters, or figure-by-figure reading sections unless the user explicitly asks for them.
 
-When the method contains a nontrivial training, inference, retrieval, routing, masking, or evaluation process, include pseudocode or code-like blocks that let the reader follow one complete pass. These blocks should teach the paper; they are not implementation guarantees unless the paper provides official code.
+When the method contains a nontrivial training, inference, retrieval, routing, masking, or evaluation process, include pseudocode or code-like blocks that let the reader follow one complete pass. These blocks should teach the paper; they are not implementation guarantees unless the paper provides official code. Do not hide the central mechanism behind an undefined paper-specific function.
 
 ## 正式论文讲解报告
 
@@ -108,19 +108,15 @@ $$
 
 这一节应让读者能复述“方法实际怎么跑”。
 
-建议加入一段简洁伪代码，例如：
+伪代码通常分三层展开：
 
-```python
-def one_training_step(batch):
-    inputs = preprocess(batch)
-    states = model_forward(inputs)
-    scores = compute_scores(states)
-    loss = compute_loss(scores, labels=batch.labels)
-    loss.backward()
-    optimizer.step()
-```
+1. 端到端流程：一个输入或 batch 如何到达输出/loss。
+2. 核心模块 forward：论文新模块内部如何处理输入。
+3. objective/update：分数、正负样本、loss、梯度或参数更新如何计算。
 
-伪代码必须替换成论文中的真实对象、模块、mask、loss、负样本、prompt、retrieval candidates 或更新对象。
+伪代码必须使用论文中的真实对象、模块、mask、loss、负样本、prompt、retrieval candidates 或更新对象。凡是论文核心模块或关键计算，例如 `qformer(...)`、`router(...)`、`retrieve(...)`、`compute_similarity(...)`，都必须在附近继续展开或给出完整函数契约，不能只写一个函数名。
+
+每个关键函数应让读者知道：输入/输出是什么、shape 是什么、内部按什么顺序计算、哪些 mask/选择规则生效、哪些参数冻结或更新、输出接下来被谁使用。标准操作如 `cross_entropy`、`backward`、`optimizer.step` 可以保留为黑盒。
 
 ### 6. 实验与结果：论文如何证明它有效
 
@@ -178,6 +174,7 @@ def one_training_step(batch):
 - 图像在对应方法、架构、实验或流程段落中嵌入。
 - 表格在对应实验段落中嵌入，并解释它支持的 claim。
 - 伪代码在训练、推理、路由、检索、mask 或评估机制附近嵌入。
+- 伪代码递归展开到论文创新点可见为止，不能用未定义函数重新命名关键机制。
 - 可以保留原文逻辑顺序，但要用讲解逻辑重组小节。
 
 ## Style Requirements

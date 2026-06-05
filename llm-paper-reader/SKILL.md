@@ -25,6 +25,7 @@ The default deliverable is a polished Chinese Markdown report, usually named `re
    - Use `references/output_templates.md` for the final report structure.
    - Use `references/architecture_checklist.md` for architecture-heavy papers.
    - Use `references/formula_explanation.md` whenever the paper contains equations, losses, algorithms, or mathematical notation.
+   - Use `references/pseudocode_guide.md` whenever the report needs to explain a model forward pass, training step, inference algorithm, retrieval/routing process, or update rule.
    - Use `references/terminology_guide.md` when the paper introduces named terms, modules, metrics, datasets, or objectives.
    - Use `references/experiment_checklist.md` when analyzing experiments, baselines, ablations, or metrics.
    - Use `references/visual_policy.md` when extracting original figures or generating explanatory diagrams.
@@ -52,7 +53,8 @@ Use the classification to decide which sections need the deepest reading.
 3. Inspect figures, tables, equations, and algorithms before writing conclusions.
 4. Read experiments for datasets, baselines, metrics, main results, ablations, and failure cases.
 5. Check limitations and appendix implementation details when available.
-6. Produce a polished Chinese Markdown report using the output template. Preserve the paper's logical progression, but do not mechanically mirror every subsection heading.
+6. Audit pseudocode for unexplained paper-specific functions. Expand or define every understanding-critical call and verify it agrees with the formulas, shapes, masks, frozen/trainable state, and gradient/update paths.
+7. Produce a polished Chinese Markdown report using the output template. Preserve the paper's logical progression, but do not mechanically mirror every subsection heading.
 
 ## Evidence Rules
 
@@ -68,7 +70,7 @@ Use the classification to decide which sections need the deepest reading.
 
 Before deep-diving into details, establish the complete conceptual architecture of the paper: what problem enters the system, what objects or modules the paper operates on, how information flows, what objective or intervention changes, and what output or conclusion is produced.
 
-If the paper has a nontrivial training loop, inference loop, routing algorithm, retrieval process, attention mask, optimizer update, or evaluation procedure, include concise pseudocode or code-like blocks that show one complete pass through the method.
+If the paper has a nontrivial training loop, inference loop, routing algorithm, retrieval process, attention mask, optimizer update, or evaluation procedure, include concise pseudocode or code-like blocks that show one complete pass through the method. Recursively expand paper-specific functions until the novel mechanism is visible; do not hide the core contribution behind calls such as `proposed_module(...)`, `qformer(...)`, `router(...)`, or `compute_paper_loss(...)`.
 
 For architecture or method papers, explicitly cover:
 
@@ -89,6 +91,7 @@ Use `references/architecture_checklist.md` for a complete inspection list.
 - Do not merely restate the paper's outline.
 - First build the full architecture or conceptual map, then explain local pieces inside that map.
 - For each important mechanism, explain: what it is, why it is needed, how it works, what it consumes, what it produces, and what can go wrong.
+- For every paper-specific module invoked in prose or pseudocode, define its function contract: inputs, outputs, shapes when available, internal operations, masks/selection rules, trainable or frozen state, and gradient/update path.
 - Prefer explanatory prose over long bullet lists. Use bullets only for dense comparisons or implementation details.
 - When the paper is a survey, synthesize the field architecture: object layer, method layer, intervention layer, application layer, and evaluation layer.
 
@@ -159,3 +162,4 @@ Use cropped table images for main results and important ablations, then explain 
 - Avoid reports that read like Chinese translations of the paper. The report should teach the paper's internal logic.
 - Keep the report concrete: architecture, terminology, evidence, experiments, and limitations should be more detailed than the high-level summary.
 - Use code blocks for key flows when they improve understanding: training steps, inference steps, attention masks, loss computation, data construction, retrieval/routing, or evaluation.
+- Pseudocode must expose the paper's important internals. Standard operations may remain black boxes, but novel or understanding-critical functions must be defined or expanded nearby.
