@@ -19,11 +19,12 @@ The default deliverable is a polished Chinese Markdown report, usually named `re
    - `scripts/extract_paper_text.py paper.pdf --out paper_text.md`
    - `scripts/extract_figures.py paper.pdf --out-dir figures --metadata figures/metadata.json`
    - `scripts/extract_tables.py paper.pdf --out-dir tables --metadata tables/metadata.json`
-4. When using original figures or tables, prefer cropped assets that contain only the figure/table body and necessary legend. Do not use full-page screenshots in the final report unless no usable crop can be produced.
+4. When using original figures or tables, use cropped assets that contain only the figure/table body and necessary legend. Never embed full-page screenshots in the final report; generate a grounded replacement or omit the image if no usable crop can be produced.
 5. Build an internal evidence map before final writing. Track section, page, figure, table, equation, algorithm, and appendix anchors for grounding, but do not expose the evidence map as a final report section.
 6. Load only the needed reference files:
    - Use `references/output_templates.md` for the final report structure.
    - Use `references/architecture_checklist.md` for architecture-heavy papers.
+   - Use `references/mechanism_depth.md` for every understanding-critical mechanism, especially routing, retrieval, attention, masking, sampling, memory, decoding, and optimization.
    - Use `references/formula_explanation.md` whenever the paper contains equations, losses, algorithms, or mathematical notation.
    - Use `references/pseudocode_guide.md` whenever the report needs to explain a model forward pass, training step, inference algorithm, retrieval/routing process, or update rule.
    - Use `references/terminology_guide.md` when the paper introduces named terms, modules, metrics, datasets, or objectives.
@@ -52,11 +53,14 @@ Use the classification to decide which sections need the deepest reading.
 1. Skim title, abstract, introduction, and conclusion to identify the problem and claimed contributions.
 2. Read the method section deeply and extract modules, data flow, objectives, algorithms, and inference-time behavior.
 3. Inspect figures, tables, equations, and algorithms before writing conclusions.
-4. Read experiments for datasets, baselines, metrics, main results, ablations, and failure cases.
-5. Inspect limitations, discussion, conclusion, failure cases, broader impact, ethical considerations, and appendix notes. Extract the authors' explicitly stated limitations and future directions, even when they are scattered outside a dedicated section.
-6. Distinguish author-stated limitations, author-proposed future work, experiment-supported boundaries, and your own cautious analysis.
-7. Audit pseudocode for unexplained paper-specific functions. Expand or define every understanding-critical call and verify it agrees with the formulas, shapes, masks, frozen/trainable state, and gradient/update paths.
-8. Produce a polished Chinese Markdown report using the output template. Preserve the paper's logical progression, but do not mechanically mirror every subsection heading.
+4. Verify every understanding-critical equation against the rendered PDF, paper source, or official code. PDF text extraction often corrupts parentheses, superscripts, subscripts, and operator scope; do not explain an unverified extracted equation.
+5. Read experiments for datasets, baselines, metrics, main results, ablations, and failure cases.
+6. Inspect limitations, discussion, conclusion, failure cases, broader impact, ethical considerations, and appendix notes. Extract the authors' explicitly stated limitations and future directions, even when they are scattered outside a dedicated section.
+7. Distinguish author-stated limitations, author-proposed future work, experiment-supported boundaries, and your own cautious analysis.
+8. Identify the three to seven understanding-critical mechanisms. For each one, build a mechanism record containing exact computation, inputs/outputs and shapes, control or selection rule, learning path, one concrete trace, and expanded pseudocode. Use `references/mechanism_depth.md`.
+9. Audit formulas and pseudocode together. Expand or define every understanding-critical call and verify that formulas, tensor axes, reductions, shapes, masks, frozen/trainable state, selection rules, and gradient/update paths agree.
+10. Produce a polished Chinese Markdown report using the output template. Preserve the paper's logical progression, but do not mechanically mirror every subsection heading.
+11. Run the final depth and visual audit. Do not deliver while a critical mechanism remains a named black box, an important formula cannot be followed as a calculation, or a final-report image is an uncropped full page.
 
 ## Evidence Rules
 
@@ -75,6 +79,8 @@ Before deep-diving into details, establish the complete conceptual architecture 
 
 If the paper has a nontrivial training loop, inference loop, routing algorithm, retrieval process, attention mask, optimizer update, or evaluation procedure, include concise pseudocode or code-like blocks that show one complete pass through the method. Recursively expand paper-specific functions until the novel mechanism is visible; do not hide the core contribution behind calls such as `proposed_module(...)`, `qformer(...)`, `router(...)`, or `compute_paper_loss(...)`.
 
+For each understanding-critical mechanism, the report must expose its exact execution path rather than only its purpose. At minimum, cover inputs/state, raw computation, normalization and reduction axes, control or selection decision, outputs and consumers, learning/gradient path, one concrete token/sample/batch trace, and expanded pseudocode. If an item is not stated, say `原文未明确说明`.
+
 For architecture or method papers, explicitly cover:
 
 - input and output format
@@ -87,6 +93,7 @@ For architecture or method papers, explicitly cover:
 - structural differences from the baseline
 
 Use `references/architecture_checklist.md` for a complete inspection list.
+Use `references/mechanism_depth.md` for the minimum acceptable depth of each critical mechanism.
 
 ## Explanation Quality Requirements
 
@@ -95,6 +102,8 @@ Use `references/architecture_checklist.md` for a complete inspection list.
 - First build the full architecture or conceptual map, then explain local pieces inside that map.
 - For each important mechanism, explain: what it is, why it is needed, how it works, what it consumes, what it produces, and what can go wrong.
 - For every paper-specific module invoked in prose or pseudocode, define its function contract: inputs, outputs, shapes when available, internal operations, masks/selection rules, trainable or frozen state, and gradient/update path.
+- A phrase such as “compute similarity/affinity and select top-k” is not a sufficient explanation. Show the compared objects, raw score equation, normalization axis, selection timing, treatment of discarded candidates, dispatch/combine or downstream use, and learning signal.
+- Use one concrete trace for each difficult core mechanism. Follow one token, sample, query, candidate set, or batch through the actual intermediate states and shapes; use clearly labeled explanatory values only when helpful.
 - Prefer explanatory prose over long bullet lists. Use bullets only for dense comparisons or implementation details.
 - When the paper is a survey, synthesize the field architecture: object layer, method layer, intervention layer, application layer, and evaluation layer.
 
@@ -114,6 +123,7 @@ Use `references/terminology_guide.md` for the detailed standard.
 
 For every important formula, explain it where it appears in the method flow. Include:
 
+- a notation-faithful equation verified against the rendered paper, source, or official code rather than trusted blindly from extracted text
 - what the formula computes
 - every symbol's meaning, including dimensions when available
 - the calculation steps in plain language
@@ -121,6 +131,8 @@ For every important formula, explain it where it appears in the method flow. Inc
 - why this computation is needed
 - how the formula connects to the paper's architecture, loss, algorithm, or experiment
 - what assumption or limitation the formula implies
+- the pseudocode line or algorithmic step that realizes it
+- a small worked or symbolic trace when the operator sequence remains difficult to follow
 
 Do not place formulas in a standalone formula chapter by default. Use `references/formula_explanation.md` for the detailed standard.
 
@@ -137,6 +149,8 @@ Priority order:
 5. If no image generation tool is available, output a diagram prompt generated from paper evidence.
 
 Generated diagrams must be clearly captioned as `根据论文内容绘制的解释性示意图`. They must not contain unsupported boxes, arrows, stages, datasets, modules, or claims.
+
+Never embed an asset marked as a full-page fallback or page-render candidate in the final report. Crop it to the visual body first, generate a clearer grounded diagram, or omit it. A figure that cannot be read at normal Markdown preview width is not useful evidence.
 
 Use `references/visual_policy.md` and, when useful:
 
@@ -167,3 +181,5 @@ Use cropped table images for main results and important ablations, then explain 
 - Include limitations and future work explicitly stated by the paper. If the paper does not state a future direction, write `原文未明确提出后续研究方向` instead of inventing one.
 - Use code blocks for key flows when they improve understanding: training steps, inference steps, attention masks, loss computation, data construction, retrieval/routing, or evaluation.
 - Pseudocode must expose the paper's important internals. Standard operations may remain black boxes, but novel or understanding-critical functions must be defined or expanded nearby.
+- Before delivery, apply the depth failure conditions in `references/mechanism_depth.md`: critical mechanisms must be calculation-level, formulas must connect to algorithms, and pseudocode must not conceal the contribution.
+- When available, run `scripts/audit_report.py report.md --figures-metadata figures/metadata.json --tables-metadata tables/metadata.json`; resolve errors and review warnings rather than treating the script as a substitute for semantic audit.

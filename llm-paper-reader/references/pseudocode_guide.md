@@ -49,6 +49,9 @@ For architecture or method papers, usually provide these layers:
 
 Do not force all three layers when the paper is simple. Do not stop at layer 1 when the core module remains a black box.
 
+For each difficult core mechanism, include a concrete trace after the pseudocode. A reader should
+be able to map the trace's intermediate states to specific pseudocode lines and equations.
+
 ## Function Contract
 
 Before or after each important pseudocode function, make these points clear:
@@ -128,5 +131,8 @@ Before finalizing the report, audit every pseudocode block:
 - Confirm every paper-specific/critical call is expanded nearby or has a complete function contract.
 - Confirm tensor shapes, masks, selection rules, frozen/trainable state, and gradient paths agree with the surrounding explanation.
 - Confirm the pseudocode and formulas describe the same computation.
+- Confirm every critical score/selection path exposes raw values, normalization, selection,
+  discarded items, and downstream consumption.
+- Confirm each difficult critical mechanism has one token/sample/query/batch trace.
 - Remove decorative code blocks that only rename prose without exposing additional mechanics.
 - Mark all unsupported implementation details as `原文未明确说明`.

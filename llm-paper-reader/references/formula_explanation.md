@@ -2,6 +2,24 @@
 
 Use this guide whenever a paper contains equations, losses, algorithms, scores, update rules, metrics, routing rules, attention formulas, optimization objectives, or probability definitions.
 
+## Formula Fidelity First
+
+Never trust PDF-extracted equation text blindly. Extraction commonly moves transposes, breaks
+fractions, loses superscripts/subscripts, and changes the scope of `Softmax`, sums, cases, or
+parentheses.
+
+For every understanding-critical formula:
+
+1. inspect the rendered PDF equation and nearby prose
+2. prefer the paper's LaTeX source when available
+3. use official code to resolve implementation details, while clearly distinguishing code behavior
+   from the paper's mathematical statement
+4. verify operator scope, indices, ranges, and parentheses before placing the formula in the report
+5. if the notation remains ambiguous, state the ambiguity instead of silently choosing an
+   interpretation
+
+Do not build a detailed explanation on top of a malformed equation.
+
 ## Standard
 
 For each important formula, explain these things:
@@ -13,6 +31,8 @@ For each important formula, explain these things:
 5. **Intuition**: what the formula is doing in plain language.
 6. **Assumptions and limits**: what the formula assumes, ignores, or makes fragile.
 7. **Implementation details**: when relevant, specify softmax axis, mask semantics, positive/negative samples, normalization, temperature, logits, pooling/averaging/max/top-k, and which parameters receive gradients.
+8. **Algorithm bridge**: identify the pseudocode line or execution step that computes the formula and the next operation that consumes its result.
+9. **Worked trace**: for the hardest formulas, include a small symbolic or clearly labeled explanatory numeric example that follows the operators in order.
 
 ## Explanation Pattern
 
@@ -37,8 +57,37 @@ $$
 - Similarity scores: explain the compared objects, vector dimensions, normalization, dot product or cosine computation, temperature if present, and how multiple scores are pooled.
 - Contrastive objectives: explain positive/negative samples, score matrix shape, score function, normalization, softmax axis, and what representation is being separated.
 - RL/preference objectives: explain policy, reference model, reward/preference signal, KL or regularization terms, and update target.
-- Routing/retrieval scores: explain candidates, scoring function, top-k or threshold selection, and how selected items affect later modules.
+- Routing/retrieval scores: explain candidates, raw logits before normalization, normalization
+  axis, whether selection happens before or after normalization, whether selected weights are
+  renormalized, what happens to discarded candidates, and how dispatch/combine or downstream
+  consumption works.
 - Evaluation metrics: explain numerator/denominator, higher/lower better, and what claim the metric can or cannot support.
+
+## Operator-Level Audit
+
+For every important formula, walk through each operator rather than jumping from inputs to the
+final intuition:
+
+- transpose, matrix multiplication, dot product, distance, or cosine
+- normalization and its axis
+- mask and its values/semantics
+- top-k, max, mean, sum, concatenation, or indexing
+- indicator, sampling, stop-gradient, or non-differentiable selection
+- batch/token/candidate reductions
+- final scalar, vector, matrix, or selected set
+
+Symbol definitions alone do not count as a formula explanation. The reader should be able to
+write the corresponding pseudocode from the explanation.
+
+For a loss, explicitly show:
+
+```text
+model outputs -> targets/positives/negatives -> per-item term
+-> reduction axes -> weighted loss -> parameters receiving gradients
+```
+
+For an auxiliary loss, also explain how it interacts with the main objective and what behavior a
+larger coefficient encourages or harms.
 
 ## Pseudocode
 
@@ -54,6 +103,17 @@ When formulas define a process rather than a single scalar, add a compact pseudo
 Pseudocode must use paper-grounded names. If a line depends on an implementation detail not stated in the paper, mark it as `原文未明确说明` or phrase it as an implementation assumption.
 
 Do not use an undefined paper-specific function as a substitute for explaining a formula or mechanism. Expand important scoring, attention, routing, retrieval, loss, or update functions until the actual computation is visible.
+
+## Formula Failure Conditions
+
+Rewrite the explanation before delivery if:
+
+- it only paraphrases the equation or lists symbols
+- it says “compute similarity/probability/loss” without the underlying operations
+- it omits a softmax/reduction axis that affects semantics
+- it omits positive/negative targets, selected/discarded items, or gradient recipients
+- its pseudocode computes a materially different quantity
+- a technical reader could not calculate the next intermediate value
 
 ## Placement
 

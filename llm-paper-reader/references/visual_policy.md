@@ -20,6 +20,14 @@ Preserve figure labels and legends when possible. In the final report, place eac
 
 Use cropped figure assets. The crop should contain only the figure body and necessary legend/axis labels. Avoid full-page screenshots or crops that include surrounding paragraphs. If only a full-page render is available as an intermediate artifact, crop it before embedding it in the report.
 
+An asset whose metadata says `page_render_candidate`, `full_page_fallback`, or
+`full_page_fallback_do_not_embed`, or `embedded_full_page_do_not_embed` is an intermediate
+artifact and must not be embedded in the final report. Crop it, replace it with a grounded
+generated diagram, or omit it.
+
+Treat `safe_to_embed: true` as “not detected as a full page,” not as proof that the crop is useful.
+Every extracted asset still requires visual inspection before final placement.
+
 ## Original Table Priority
 
 Prefer original tables from the paper when they show:
@@ -105,3 +113,18 @@ Use figures sparingly and purposefully:
 - Avoid a standalone figure-by-figure explanation section unless the user specifically asks for one.
 - Avoid meta-report language about why a figure is included. Captions should directly state what the figure shows in the paper.
 - Do not rely on a table image alone; explain the result logic in prose.
+
+## Visual Utility Gate
+
+Before embedding each image, inspect the asset itself and ask:
+
+- Does it contain only the visual body, necessary labels, axes, legend, and optionally its caption?
+- Is surrounding two-column prose absent?
+- Is the important content readable at normal Markdown preview width?
+- Does the surrounding explanation refer to concrete visual elements that help explain the
+  mechanism or claim?
+- Is it placed next to the explanation it supports?
+
+Fail the image if it is a full page, mostly prose, unreadably dense, redundant with another image,
+or present only because the extraction script produced it. The number of images is not a quality
+target.
