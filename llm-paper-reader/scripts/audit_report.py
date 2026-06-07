@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit a generated paper report for common depth and visual-quality failures."""
+"""Audit a paper report for depth, mathematical typography, and visual failures."""
 
 from __future__ import annotations
 
@@ -14,6 +14,27 @@ from typing import Any
 IMAGE_RE = re.compile(r"!\[[^\]]*]\((?P<path>[^)\s]+)(?:\s+\"[^\"]*\")?\)")
 CODE_RE = re.compile(r"```(?P<lang>[^\n]*)\n(?P<body>.*?)```", re.DOTALL)
 FORMULA_RE = re.compile(r"\$\$(?P<body>.*?)\$\$", re.DOTALL)
+INLINE_CODE_RE = re.compile(r"`[^`\n]*`")
+INLINE_DOLLAR_MATH_RE = re.compile(r"(?<!\\)\$(?!\$)[^\n$]*?(?<!\\)\$")
+PAREN_MATH_RE = re.compile(r"\\\(.*?\\\)", re.DOTALL)
+BRACKET_MATH_RE = re.compile(r"\\\[.*?\\\]", re.DOTALL)
+MARKDOWN_LINK_RE = re.compile(r"!?\[[^\]]*]\([^)]+\)")
+BARE_INDEXED_MATH_RE = re.compile(
+    r"(?<![\\\w])(?P<expr>"
+    r"[A-Za-z][A-Za-z0-9]*"
+    r"(?:_(?:\{[^}\n]+\}|[A-Za-z0-9']+)|\^(?:\{[^}\n]+\}|[A-Za-z0-9']+))+"
+    r")"
+)
+BARE_SYMBOLIC_EXPRESSION_RE = re.compile(
+    r"(?<![\\\w])(?P<expr>"
+    r"(?:m[A-Z]|[A-Z](?:_(?:\{[^}\n]+\}|[A-Za-z0-9']+))?)"
+    r"(?:\s*[-+*/=]\s*(?:m[A-Z]|[A-Z](?:_(?:\{[^}\n]+\}|[A-Za-z0-9']+))?|\d+))+"
+    r")(?!\w)"
+)
+POSSIBLE_BARE_COUNT_RE = re.compile(
+    r"(?<![\\\w-])(?P<expr>m[A-Z]|[NKTDLBmnkd])"
+    r"(?=\s*(?:个|组|层|维|项|次|种|条|张|台|倍))"
+)
 UNSAFE_METHODS = {
     "page_render_candidate",
     "full_page_fallback",
@@ -66,6 +87,67 @@ def visible_text_length(text: str) -> int:
     text = re.sub(r"`[^`]*`", "", text)
     text = re.sub(r"\s+", "", text)
     return len(text)
+
+
+def mask_match(match: re.Match[str]) -> str:
+    return "".join("\n" if char == "\n" else " " for char in match.group(0))
+
+
+def mask_protected_regions(text: str) -> str:
+    for pattern in (
+        CODE_RE,
+        FORMULA_RE,
+        BRACKET_MATH_RE,
+        PAREN_MATH_RE,
+        INLINE_DOLLAR_MATH_RE,
+        INLINE_CODE_RE,
+        MARKDOWN_LINK_RE,
+    ):
+        text = pattern.sub(mask_match, text)
+    return text
+
+
+def line_number(text: str, offset: int) -> int:
+    return text.count("\n", 0, offset) + 1
+
+
+def audit_math_typography(report_text: str) -> tuple[list[str], list[str]]:
+    errors: list[str] = []
+    warnings: list[str] = []
+    masked = mask_protected_regions(report_text)
+    definite_matches: set[tuple[int, str]] = set()
+    definite_spans: list[tuple[int, int]] = []
+
+    for pattern in (BARE_SYMBOLIC_EXPRESSION_RE, BARE_INDEXED_MATH_RE):
+        for match in pattern.finditer(masked):
+            if any(start <= match.start() < end for start, end in definite_spans):
+                continue
+            expr = match.group("expr").strip()
+            item = (line_number(masked, match.start()), expr)
+            if item in definite_matches:
+                continue
+            definite_matches.add(item)
+            definite_spans.append((match.start(), match.end()))
+            errors.append(
+                f"line {item[0]} has bare mathematical notation `{expr}`; "
+                f"render it as `${expr}$` or mark it as a literal code identifier"
+            )
+
+    possible_matches: set[tuple[int, str]] = set()
+    for match in POSSIBLE_BARE_COUNT_RE.finditer(masked):
+        if any(start <= match.start() < end for start, end in definite_spans):
+            continue
+        expr = match.group("expr")
+        item = (line_number(masked, match.start()), expr)
+        if item in possible_matches:
+            continue
+        possible_matches.add(item)
+        warnings.append(
+            f"line {item[0]} may have an unrendered count variable `{expr}`; "
+            f"use `${expr}$` if it is paper notation"
+        )
+
+    return errors, warnings
 
 
 def audit_images(
@@ -158,7 +240,10 @@ def audit_mechanism_pseudocode(report_text: str) -> list[str]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Audit a paper report for shallow mechanisms/formulas and unsafe visuals.",
+        description=(
+            "Audit a paper report for shallow mechanisms/formulas, bare mathematical "
+            "notation, and unsafe visuals."
+        ),
     )
     parser.add_argument("report", help="Path to the Markdown report")
     parser.add_argument(
@@ -189,7 +274,14 @@ def main() -> None:
     metadata = load_metadata(metadata_paths)
 
     errors, image_warnings = audit_images(report_path, report_text, metadata)
-    warnings = image_warnings + audit_formula_depth(report_text) + audit_mechanism_pseudocode(report_text)
+    math_errors, math_warnings = audit_math_typography(report_text)
+    errors += math_errors
+    warnings = (
+        image_warnings
+        + math_warnings
+        + audit_formula_depth(report_text)
+        + audit_mechanism_pseudocode(report_text)
+    )
 
     for message in errors:
         print(f"ERROR: {message}")

@@ -26,6 +26,7 @@ The default deliverable is a polished Chinese Markdown report, usually named `re
    - Use `references/architecture_checklist.md` for architecture-heavy papers.
    - Use `references/mechanism_depth.md` for every understanding-critical mechanism, especially routing, retrieval, attention, masking, sampling, memory, decoding, and optimization.
    - Use `references/formula_explanation.md` whenever the paper contains equations, losses, algorithms, or mathematical notation.
+   - Use `references/math_typography.md` whenever the report contains mathematical variables, expressions, equations, or tensor shapes.
    - Use `references/pseudocode_guide.md` whenever the report needs to explain a model forward pass, training step, inference algorithm, retrieval/routing process, or update rule.
    - Use `references/terminology_guide.md` when the paper introduces named terms, modules, metrics, datasets, or objectives.
    - Use `references/experiment_checklist.md` when analyzing experiments, baselines, ablations, or metrics.
@@ -60,7 +61,7 @@ Use the classification to decide which sections need the deepest reading.
 8. Identify the three to seven understanding-critical mechanisms. For each one, build a mechanism record containing exact computation, inputs/outputs and shapes, control or selection rule, learning path, one concrete trace, and expanded pseudocode. Use `references/mechanism_depth.md`.
 9. Audit formulas and pseudocode together. Expand or define every understanding-critical call and verify that formulas, tensor axes, reductions, shapes, masks, frozen/trainable state, selection rules, and gradient/update paths agree.
 10. Produce a polished Chinese Markdown report using the output template. Preserve the paper's logical progression, but do not mechanically mirror every subsection heading.
-11. Run the final depth and visual audit. Do not deliver while a critical mechanism remains a named black box, an important formula cannot be followed as a calculation, or a final-report image is an uncropped full page.
+11. Run the final depth, mathematical-typography, and visual audit. Do not deliver while a critical mechanism remains a named black box, an important formula cannot be followed as a calculation, mathematical notation appears as raw text in prose, or a final-report image is an uncropped full page.
 
 ## Evidence Rules
 
@@ -136,6 +137,18 @@ For every important formula, explain it where it appears in the method flow. Inc
 
 Do not place formulas in a standalone formula chapter by default. Use `references/formula_explanation.md` for the detailed standard.
 
+## Mathematical Typography Requirements
+
+- Use `$...$` for inline paper variables and symbolic expressions in prose, bullets, headings, and Markdown tables; use `$$...$$` for display equations.
+- Never leave paper notation such as `K_s`, `g_{i,t}`, `mN-K_s`, or `alpha_1` as raw text outside code blocks.
+- Use backticks for literal implementation identifiers such as `router_logits`, not for mathematical notation.
+- Keep prose and quantifier words outside math delimiters: write `$K_s$ 个共享专家`, not `$K_s 个共享专家$`.
+- At first use, unpack compact expressions in words and arithmetic. For example, explain `$mN-K_s = m\times N-K_s$` as the fine-grained expert total minus shared experts.
+- Avoid hybrid notation such as `top-(mK-K_s)`; write natural prose such as `选择得分最高的 $mK-K_s$ 个路由专家`.
+- Preview the final Markdown and verify subscripts, superscripts, Greek letters, matrices, and inline expressions render correctly.
+
+Use `references/math_typography.md` for the complete standard.
+
 ## Visual Requirements
 
 Always check whether the paper contains useful figures and tables, but use visuals as reading aids inside the relevant academic sections, not as the organizing center of the report.
@@ -182,4 +195,4 @@ Use cropped table images for main results and important ablations, then explain 
 - Use code blocks for key flows when they improve understanding: training steps, inference steps, attention masks, loss computation, data construction, retrieval/routing, or evaluation.
 - Pseudocode must expose the paper's important internals. Standard operations may remain black boxes, but novel or understanding-critical functions must be defined or expanded nearby.
 - Before delivery, apply the depth failure conditions in `references/mechanism_depth.md`: critical mechanisms must be calculation-level, formulas must connect to algorithms, and pseudocode must not conceal the contribution.
-- When available, run `scripts/audit_report.py report.md --figures-metadata figures/metadata.json --tables-metadata tables/metadata.json`; resolve errors and review warnings rather than treating the script as a substitute for semantic audit.
+- When available, run `scripts/audit_report.py report.md --figures-metadata figures/metadata.json --tables-metadata tables/metadata.json`; resolve all errors, including bare mathematical notation, and review warnings rather than treating the script as a substitute for semantic audit.

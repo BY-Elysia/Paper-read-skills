@@ -20,6 +20,9 @@ For every understanding-critical formula:
 
 Do not build a detailed explanation on top of a malformed equation.
 
+Use `math_typography.md` to format every variable and symbolic expression that appears in the
+surrounding prose. Formula fidelity includes both mathematical meaning and readable rendering.
+
 ## Standard
 
 For each important formula, explain these things:
