@@ -4,6 +4,10 @@ Use this guide whenever a paper contains a nontrivial model module, training loo
 
 The purpose of pseudocode is to expose how the paper works. Do not hide the paper's core contribution behind an undefined function call.
 
+Before showing paper-specific pseudocode, bridge from the conventional algorithm when the default
+reader would not otherwise know what the code replaces or extends. Pseudocode without that
+starting point can be executable yet still pedagogically opaque.
+
 ## Black-Box Rule
 
 Recursively expand pseudocode until the paper's novel mechanism is visible.
@@ -51,6 +55,9 @@ Do not force all three layers when the paper is simple. Do not stop at layer 1 w
 
 For each difficult core mechanism, include a concrete trace after the pseudocode. A reader should
 be able to map the trace's intermediate states to specific pseudocode lines and equations.
+
+For the hardest score, selection, or update, prefer a tiny clearly labeled numerical walkthrough
+in addition to shapes when that makes the computation materially easier to understand.
 
 ## Function Contract
 
@@ -134,5 +141,7 @@ Before finalizing the report, audit every pseudocode block:
 - Confirm every critical score/selection path exposes raw values, normalization, selection,
   discarded items, and downstream consumption.
 - Confirm each difficult critical mechanism has one token/sample/query/batch trace.
+- Confirm the reader knows the conventional starting point and why the paper-specific code differs.
+- Confirm invented values in walkthroughs are labeled as explanatory examples, not paper results.
 - Remove decorative code blocks that only rename prose without exposing additional mechanics.
 - Mark all unsupported implementation details as `原文未明确说明`.

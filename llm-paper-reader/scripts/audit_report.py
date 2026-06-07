@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit a paper report for depth, mathematical typography, and visual failures."""
+"""Audit a paper report for pedagogy, depth, mathematical typography, and visuals."""
 
 from __future__ import annotations
 
@@ -42,13 +42,48 @@ UNSAFE_METHODS = {
     "embedded_full_page_do_not_embed",
 }
 CRITICAL_MECHANISMS = {
-    "routing": ("router", "routing", "路由"),
+    "routing": ("router", "routing", "route", "路由"),
     "retrieval": ("retrieve", "retrieval", "检索"),
     "attention": ("attention", "注意力"),
     "sampling": ("sampling", "sample", "采样"),
     "reranking": ("rerank", "reranking", "重排序"),
     "memory update": ("memory update", "更新记忆", "记忆更新"),
 }
+TEACHING_BRIDGE_MARKERS = (
+    "为了理解",
+    "先补充",
+    "普通 transformer",
+    "普通模型",
+    "传统方法",
+    "传统模型",
+    "传统架构",
+    "常规方法",
+    "标准方法",
+    "标准 transformer",
+    "baseline",
+    "基线",
+    "此前",
+    "原本",
+    "相比之下",
+)
+EXPLANATORY_EXAMPLE_MARKERS = (
+    "解释性例子",
+    "为了说明计算",
+    "仅用于解释",
+    "不是论文实验结果",
+    "假设一个",
+    "例如，假设",
+    "例如假设",
+)
+EXAMPLE_BOUNDARY_MARKERS = (
+    "不是论文实验结果",
+    "并非论文实验结果",
+    "仅用于解释",
+    "只用于解释",
+    "示例数值",
+    "invented example",
+    "not a paper result",
+)
 CALL_RE = re.compile(r"\b(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*\(")
 CRITICAL_NAME_RE = re.compile(
     r"router|routing|route|retrieve|rerank|select|sample|similarity|score|"
@@ -238,11 +273,48 @@ def audit_mechanism_pseudocode(report_text: str) -> list[str]:
     return warnings
 
 
+def audit_pedagogy(report_text: str) -> list[str]:
+    warnings: list[str] = []
+    lowered = report_text.lower()
+    mechanism_mentions = sum(
+        lowered.count(keyword.lower())
+        for keywords in CRITICAL_MECHANISMS.values()
+        for keyword in keywords
+    )
+    formula_count = len(FORMULA_RE.findall(report_text))
+
+    if mechanism_mentions >= 5 and not any(
+        marker in lowered for marker in TEACHING_BRIDGE_MARKERS
+    ):
+        warnings.append(
+            "report discusses specialized mechanisms but may lack a just-in-time bridge from "
+            "a conventional method or familiar baseline"
+        )
+
+    if (mechanism_mentions >= 5 or formula_count >= 3) and not any(
+        marker in lowered for marker in EXPLANATORY_EXAMPLE_MARKERS
+    ):
+        warnings.append(
+            "report may lack a clearly labeled explanatory walkthrough/example for its hardest "
+            "mechanism or formula"
+        )
+
+    if "解释性例子" in lowered and not any(
+        marker in lowered for marker in EXAMPLE_BOUNDARY_MARKERS
+    ):
+        warnings.append(
+            "report labels an explanatory example but may not clearly state that its invented "
+            "values are not paper results"
+        )
+
+    return warnings
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Audit a paper report for shallow mechanisms/formulas, bare mathematical "
-            "notation, and unsafe visuals."
+            "Audit a paper report for pedagogy gaps, shallow mechanisms/formulas, bare "
+            "mathematical notation, and unsafe visuals."
         ),
     )
     parser.add_argument("report", help="Path to the Markdown report")
@@ -281,6 +353,7 @@ def main() -> None:
         + math_warnings
         + audit_formula_depth(report_text)
         + audit_mechanism_pseudocode(report_text)
+        + audit_pedagogy(report_text)
     )
 
     for message in errors:

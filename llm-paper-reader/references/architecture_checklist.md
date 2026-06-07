@@ -5,6 +5,8 @@ Use this checklist when the paper proposes or modifies a model, training framewo
 ## Model Surface
 
 - Task input and output format
+- Closest familiar architecture or conventional baseline for the default reader
+- Prerequisite concepts the paper assumes but does not explain
 - Tokenization or representation assumptions
 - Base model, backbone, encoder, decoder, or pretrained checkpoint
 - Whether the method changes architecture, training, inference, or only data
@@ -63,9 +65,12 @@ Do not stop at an end-to-end flow if a central module remains an unexplained bla
 For every important component, record:
 
 - name used in the paper
+- conventional predecessor or familiar starting point
+- prerequisite bridge required by the default reader
 - function
 - input
 - output
 - connection to other components
 - evidence anchor
 - whether the connection is explicit or inferred from the paper
+- exact operational difference from the closest baseline

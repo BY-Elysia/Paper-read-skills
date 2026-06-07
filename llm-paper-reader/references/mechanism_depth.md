@@ -27,21 +27,26 @@ shorter.
 
 For each critical mechanism, explain all applicable items:
 
-1. **Role**: the problem it solves and its position in the complete architecture.
-2. **Inputs and state**: tensors, candidates, parameters, caches, external state, and shapes.
-3. **Exact computation**: logits/scores, normalization, masks, reductions, selection, sampling,
+1. **Conventional starting point**: what the default reader already knows or must be taught before
+   this mechanism, and how the conventional method works.
+2. **Role and change**: the problem it solves, its position in the complete architecture, and the
+   exact difference introduced by the paper.
+3. **Inputs and state**: tensors, candidates, parameters, caches, external state, and shapes.
+4. **Exact computation**: logits/scores, normalization, masks, reductions, selection, sampling,
    aggregation, and output construction in execution order.
-4. **Control decision**: top-k, threshold, argmax, routing, retrieval, branching, stopping, or
+5. **Control decision**: top-k, threshold, argmax, routing, retrieval, branching, stopping, or
    update rule, including what is selected and what is discarded.
-5. **Outputs and consumers**: output shape and the next component that uses it.
-6. **Learning path**: supervision, loss contribution, trainable/frozen parameters, differentiable
+6. **Outputs and consumers**: output shape and the next component that uses it.
+7. **Learning path**: supervision, loss contribution, trainable/frozen parameters, differentiable
    and non-differentiable operations, and gradient/update path.
-7. **One concrete trace**: follow one token, sample, query, candidate set, or batch through the
+8. **One concrete trace**: follow one token, sample, query, candidate set, or batch through the
    mechanism using shapes and symbolic/example values. Clearly mark invented values as an
    explanatory example, not a paper result.
-8. **Expanded pseudocode**: show the mechanism's internal operations. Do not replace it with a
+9. **Expanded pseudocode**: show the mechanism's internal operations. Do not replace it with a
    function bearing the mechanism's name.
-9. **Boundary**: omitted implementation details, assumptions, failure cases, or costs.
+10. **Why the change should help**: connect the operational change to the paper's claimed benefit,
+    rather than repeating the claim.
+11. **Boundary**: omitted implementation details, assumptions, failure cases, or costs.
 
 If the paper does not state an applicable item, write `原文未明确说明`. Do not silently skip it or
 invent it.
@@ -118,6 +123,9 @@ Shapes alone are not enough when the calculation remains abstract. Add a tiny sy
 invented-number example for the hardest operation when it materially improves understanding,
 and explicitly label it `解释性例子`.
 
+Before the trace, make sure the default reader understands what the mechanism is replacing or
+extending. A worked route through an unexplained architecture is still hard to follow.
+
 ## Depth Failure Conditions
 
 The mechanism is still too shallow if any of these are true:
@@ -128,6 +136,9 @@ The mechanism is still too shallow if any of these are true:
 - top-k/routing/retrieval is described without raw scores, normalization axis, and downstream use
 - a loss is described without targets, reductions, optimization direction, and affected parameters
 - no complete pass shows how the mechanism participates in training or inference
+- the explanation begins from a specialized mechanism without bridging the conventional method
+- the report states that the paper improves a baseline without explaining the operational
+  difference that causes the improvement
 - the explanation cannot answer “how would I implement the next line?”
 
 Resolve these failures before writing the conclusion.

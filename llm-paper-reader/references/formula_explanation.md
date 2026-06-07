@@ -27,22 +27,26 @@ surrounding prose. Formula fidelity includes both mathematical meaning and reada
 
 For each important formula, explain these things:
 
-1. **Purpose**: what quantity the formula computes and why the paper needs it.
-2. **Symbols**: every important symbol, including index ranges and tensor shapes when available.
-3. **Computation**: how the value is calculated step by step.
-4. **Location in the method**: whether it belongs to data construction, model forward pass, training loss, inference, intervention, or evaluation.
-5. **Intuition**: what the formula is doing in plain language.
-6. **Assumptions and limits**: what the formula assumes, ignores, or makes fragile.
-7. **Implementation details**: when relevant, specify softmax axis, mask semantics, positive/negative samples, normalization, temperature, logits, pooling/averaging/max/top-k, and which parameters receive gradients.
-8. **Algorithm bridge**: identify the pseudocode line or execution step that computes the formula and the next operation that consumes its result.
-9. **Worked trace**: for the hardest formulas, include a small symbolic or clearly labeled explanatory numeric example that follows the operators in order.
+1. **Conceptual need**: what familiar problem or conventional calculation creates the need for
+   this formula, and what behavior the formula controls.
+2. **Purpose**: what quantity the formula computes and why the paper needs it.
+3. **Symbols**: every important symbol, including index ranges and tensor shapes when available.
+4. **Computation**: how the value is calculated step by step.
+5. **Location in the method**: whether it belongs to data construction, model forward pass, training loss, inference, intervention, or evaluation.
+6. **Intuition**: what the formula is doing in plain language and how it differs from the closest
+   familiar objective or computation.
+7. **Assumptions and limits**: what the formula assumes, ignores, or makes fragile.
+8. **Implementation details**: when relevant, specify softmax axis, mask semantics, positive/negative samples, normalization, temperature, logits, pooling/averaging/max/top-k, and which parameters receive gradients.
+9. **Algorithm bridge**: identify the pseudocode line or execution step that computes the formula and the next operation that consumes its result.
+10. **Worked trace**: for the hardest formulas, include a small symbolic or clearly labeled explanatory numeric example that follows the operators in order.
 
 ## Explanation Pattern
 
-Avoid saying only “the paper defines X as...”. Teach the formula:
+Avoid saying only “the paper defines X as...”. Teach the formula from concept to calculation:
 
 ```markdown
-这里作者要计算的是 <quantity>，它用于 <method role>。
+普通/传统方法中，<familiar computation or problem>。本文需要进一步解决 <gap>，因此
+这里要计算 <quantity>，它控制 <behavior>。
 
 $$
 ...
@@ -51,6 +55,8 @@ $$
 这个式子可以分成几步理解。第一步，...；第二步，...；第三步，...。
 其中，... 表示 ...，维度是 ...；... 表示 ...。
 直观上，它是在 ...。如果 <condition> 不成立，这个公式可能会 ...
+
+解释性例子：<small symbolic or numeric walkthrough when helpful>
 ```
 
 ## Depth Rules
@@ -112,11 +118,14 @@ Do not use an undefined paper-specific function as a substitute for explaining a
 Rewrite the explanation before delivery if:
 
 - it only paraphrases the equation or lists symbols
+- it begins with symbols before explaining why the quantity exists
 - it says “compute similarity/probability/loss” without the underlying operations
 - it omits a softmax/reduction axis that affects semantics
 - it omits positive/negative targets, selected/discarded items, or gradient recipients
 - its pseudocode computes a materially different quantity
 - a technical reader could not calculate the next intermediate value
+- a reader with basic LLM knowledge could perform the arithmetic but still not explain what
+  behavior the formula changes or why the paper needs it
 
 ## Placement
 

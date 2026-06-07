@@ -15,14 +15,22 @@ Use this checklist when reading experiments, baselines, ablations, benchmarks, a
 
 - Baseline names
 - Whether baselines are prior work, model variants, or internal ablations
+- The baseline's minimum operational flow needed by the default reader
+- The exact component, objective, data, or inference step that differs from the paper's method
 - Whether comparisons are fair according to the paper's setup
 - Missing baselines that affect interpretation
+
+Do not assume a baseline name explains the comparison. When the baseline is central, give the
+reader the shortest grounded explanation needed to understand what changed and why the comparison
+tests the paper's claim.
 
 ## Metrics
 
 - Metric names
 - What each metric measures
 - Whether higher or lower is better
+- A small intuitive example of what would make the metric improve or worsen when the metric is not
+  obvious from basic deep-learning knowledge
 - Whether the metric directly supports the claimed contribution
 - Any human evaluation protocol
 
@@ -38,6 +46,8 @@ For each important result, record:
 - relative improvement if stated
 - author's interpretation
 - what the result actually supports
+- why the observed direction would follow from the proposed mechanism, if the evidence supports
+  that interpretation
 - whether the original table should be cropped and embedded in the report
 
 ## Ablations
